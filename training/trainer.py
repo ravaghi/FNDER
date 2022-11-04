@@ -54,9 +54,9 @@ class ChordMixerTrainer:
         train_auc = metrics.roc_auc_score(targets, preds)
         train_accuracy = correct / items_processed
         train_loss = running_loss / items_processed
-        wandb.log({'train_loss': train_loss})
-        wandb.log({'train_accuracy': train_accuracy})
-        wandb.log({'train_auc': train_auc})
+        wandb.log({'train_loss': train_loss}, step=current_epoch_nr)
+        wandb.log({'train_accuracy': train_accuracy}, step=current_epoch_nr)
+        wandb.log({'train_auc': train_auc}, step=current_epoch_nr)
 
     def evaluate(self, current_epoch_nr, scheduler):
         self.model.eval()
@@ -95,9 +95,9 @@ class ChordMixerTrainer:
             val_auc = metrics.roc_auc_score(targets, preds)
             validation_accuracy = correct / items_processed
             validation_loss = running_loss / num_batches
-            wandb.log({'val_loss': validation_loss})
-            wandb.log({'val_accuracy': validation_accuracy})
-            wandb.log({'val_auc': val_auc})
+            wandb.log({'val_loss': validation_loss}, step=current_epoch_nr)
+            wandb.log({'val_accuracy': validation_accuracy}, step=current_epoch_nr)
+            wandb.log({'val_auc': val_auc}, step=current_epoch_nr)
 
         scheduler.step(validation_accuracy)
 
