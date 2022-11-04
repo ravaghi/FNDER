@@ -2,6 +2,8 @@ import hydra
 import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 
 from utils import init_run, get_class_weights
 from model import ChordMixer
@@ -32,6 +34,7 @@ def main(config):
         criterion = CrossEntropyLoss()
 
     optimizer = Adam(lr=config.optimizer.learning_rate, params=model.parameters())
+    scheduler = ReduceLROnPlateau(optimizer, mode="max", factor=0.5, patience=2)
 
     vocab, tokenizer = build_vocabulary(config.dataset.path, config.dataset.train)
 
@@ -66,13 +69,12 @@ def main(config):
         test_dataloader=test_dataloader,
         device=device,
         criterion=criterion,
-        optimizer=optimizer,
-        log_every_n_steps=config.general.log_every_n_steps
+        optimizer=optimizer
     )
 
     for epoch in range(config.general.max_epochs):
         trainer.train(current_epoch_nr=epoch)
-        trainer.evaluate(current_epoch_nr=epoch)
+        trainer.evaluate(current_epoch_nr=epoch, scheduler=scheduler)
 
     trainer.test()
 

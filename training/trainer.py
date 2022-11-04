@@ -5,8 +5,7 @@ import wandb
 
 
 class ChordMixerTrainer:
-    def __init__(self, model, train_dataloader, val_dataloader, test_dataloader,
-                 device, criterion, optimizer, log_every_n_steps):
+    def __init__(self, model, train_dataloader, val_dataloader, test_dataloader, device, criterion, optimizer):
         self.model = model
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
@@ -14,7 +13,6 @@ class ChordMixerTrainer:
         self.device = device
         self.criterion = criterion
         self.optimizer = optimizer
-        self.log_every_n_steps = log_every_n_steps
 
     def train(self, current_epoch_nr):
         self.model.train()
@@ -53,19 +51,6 @@ class ChordMixerTrainer:
             loop.set_postfix(train_acc=round(correct / items_processed, 4),
                              train_loss=round(running_loss / items_processed, 4))
 
-            if idx % self.log_every_n_steps == 0:
-                train_auc = metrics.roc_auc_score(targets, preds)
-                train_accuracy = correct / items_processed
-                train_loss = running_loss / items_processed
-                wandb.log({'train_loss': train_loss})
-                wandb.log({'train_accuracy': train_accuracy})
-                wandb.log({'train_auc': train_auc})
-                targets = []
-                preds = []
-                correct = 0
-                running_loss = 0.0
-                items_processed = 0
-        
         train_auc = metrics.roc_auc_score(targets, preds)
         train_accuracy = correct / items_processed
         train_loss = running_loss / items_processed
@@ -73,7 +58,7 @@ class ChordMixerTrainer:
         wandb.log({'train_accuracy': train_accuracy})
         wandb.log({'train_auc': train_auc})
 
-    def evaluate(self, current_epoch_nr):
+    def evaluate(self, current_epoch_nr, scheduler):
         self.model.eval()
 
         num_batches = len(self.val_dataloader)
@@ -107,25 +92,14 @@ class ChordMixerTrainer:
                 loop.set_postfix(val_acc=round(correct / items_processed, 4),
                                  val_loss=round(running_loss / items_processed, 4))
 
-                if idx % self.log_every_n_steps == 0:
-                    val_auc = metrics.roc_auc_score(targets, preds)
-                    validation_accuracy = correct / items_processed
-                    validation_loss = running_loss / num_batches
-                    wandb.log({'val_loss': validation_loss})
-                    wandb.log({'val_accuracy': validation_accuracy})
-                    wandb.log({'val_auc': val_auc})
-                    targets = []
-                    preds = []
-                    correct = 0
-                    running_loss = 0.0
-                    items_processed = 0
-                    
             val_auc = metrics.roc_auc_score(targets, preds)
             validation_accuracy = correct / items_processed
             validation_loss = running_loss / num_batches
             wandb.log({'val_loss': validation_loss})
             wandb.log({'val_accuracy': validation_accuracy})
             wandb.log({'val_auc': val_auc})
+
+        scheduler.step(validation_accuracy)
 
     def test(self):
         self.model.eval()

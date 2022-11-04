@@ -24,7 +24,6 @@ general:
   seed: 42
   device_id: 0
   compute_class_weights: true
-  log_every_n_steps: 50
   max_epochs: 10
   batch_size: 50
 
