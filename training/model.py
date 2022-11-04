@@ -33,47 +33,32 @@ class RotateChord(nn.Module):
         self.n_tracks = n_tracks
         self.track_size = track_size
 
-    def forward(self, x, lengths=None):
-        if not lengths:
+    def forward(self, x, lengths):
 
+        ys = torch.split(
+            tensor=x,
+            split_size_or_sections=lengths,
+            dim=0
+        )
+
+        zs = []
+
+        # roll sequences separately
+        for y in ys:
             y = torch.split(
-                tensor=x,
+                tensor=y,
                 split_size_or_sections=self.track_size,
                 dim=-1
             )
-            # roll sequences in a batch jointly
             z = [y[0]]
             for i in range(1, len(y)):
                 offset = -2 ** (i - 1)
-                z.append(torch.roll(y[i], shifts=offset, dims=1))
+                z.append(torch.roll(y[i], shifts=offset, dims=0))
             z = torch.cat(z, -1)
+            zs.append(z)
 
-        else:
-
-            ys = torch.split(
-                tensor=x,
-                split_size_or_sections=lengths,
-                dim=0
-            )
-
-            zs = []
-
-            # roll sequences separately
-            for y in ys:
-                y = torch.split(
-                    tensor=y,
-                    split_size_or_sections=self.track_size,
-                    dim=-1
-                )
-                z = [y[0]]
-                for i in range(1, len(y)):
-                    offset = -2 ** (i - 1)
-                    z.append(torch.roll(y[i], shifts=offset, dims=0))
-                z = torch.cat(z, -1)
-                zs.append(z)
-
-            z = torch.cat(zs, 0)
-            assert z.shape == x.shape, 'shape mismatch'
+        z = torch.cat(zs, 0)
+        assert z.shape == x.shape, 'shape mismatch'
         return z
 
 
@@ -101,7 +86,7 @@ class ChordMixerBlock(nn.Module):
 
         self.rotator = RotateChord(n_tracks, track_size)
 
-    def forward(self, data, lengths=None):
+    def forward(self, data, lengths):
         res_con = data
         data = self.mixer(data)
         data = self.dropout(data)
@@ -111,13 +96,12 @@ class ChordMixerBlock(nn.Module):
 
 
 class ChordMixer(nn.Module):
-    def __init__(self, vocab_size, max_seq_len, variable_length, track_size, hidden_size, mlp_dropout, layer_dropout, n_class):
+    def __init__(self, vocab_size, max_seq_len, track_size, hidden_size, mlp_dropout, layer_dropout, n_class):
         super(ChordMixer, self).__init__()
         self.max_n_layers = math.ceil(np.log2(max_seq_len))
-        self.variable_length = variable_length
         n_tracks = math.ceil(np.log2(max_seq_len))
         embedding_size = int(n_tracks * track_size)
-        
+
         # Init embedding layer
         self.embedding = nn.Embedding(
             vocab_size,
@@ -144,23 +128,15 @@ class ChordMixer(nn.Module):
             n_class
         )
 
-    def forward(self, data, lengths=None):
-        if lengths:
-            # variable lengths mode
-            n_layers = math.ceil(np.log2(lengths[0]))
-        else:
-            # equal lengths mode
-            n_layers = self.max_n_layers
+    def forward(self, data, lengths):
+        n_layers = math.ceil(np.log2(lengths[0]))
 
         data = self.embedding(data)
         for layer in range(n_layers):
             data = self.chordmixer_blocks[layer](data, lengths)
 
-        # sequence-aware average pooling
-        if lengths:
-            data = [torch.mean(t, dim=0) for t in torch.split(data, lengths)]
-            data = torch.stack(data)
-        else:
-            data = torch.mean(data, dim=1)
+        data = [torch.mean(t, dim=0) for t in torch.split(data, lengths)]
+        data = torch.stack(data)
+
         data = self.final(data)
         return data

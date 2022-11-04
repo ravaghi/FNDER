@@ -9,6 +9,7 @@ from dataloader import ChordMixerDataLoader
 from trainer import ChordMixerTrainer
 from preprocessing import build_vocabulary
 
+
 @hydra.main(config_path="configs", config_name="config", version_base=None)
 def main(config):
     device = init_run(config)
@@ -16,7 +17,6 @@ def main(config):
     model = ChordMixer(
         vocab_size=config.model.vocab_size,
         max_seq_len=config.model.max_seq_len,
-        variable_length=config.model.variable_length,
         track_size=config.model.track_size,
         hidden_size=config.model.hidden_size,
         mlp_dropout=config.model.mlp_dropout,
@@ -32,12 +32,32 @@ def main(config):
         criterion = CrossEntropyLoss()
 
     optimizer = Adam(lr=config.optimizer.learning_rate, params=model.parameters())
-    
+
     vocab, tokenizer = build_vocabulary(config.dataset.path, config.dataset.train)
 
-    train_dataloader = ChordMixerDataLoader(data_path=config.dataset.path, dataset_name=config.dataset.train, vocab=vocab, tokenizer=tokenizer, batch_size=config.general.batch_size).create_dataloader()
-    val_dataloader = ChordMixerDataLoader(data_path=config.dataset.path, dataset_name=config.dataset.val, vocab=vocab, tokenizer=tokenizer, batch_size=config.general.batch_size).create_dataloader()
-    test_dataloader = ChordMixerDataLoader(data_path=config.dataset.path, dataset_name=config.dataset.test, vocab=vocab, tokenizer=tokenizer, batch_size=config.general.batch_size).create_dataloader()
+    train_dataloader = ChordMixerDataLoader(
+        data_path=config.dataset.path,
+        dataset_name=config.dataset.train,
+        vocab=vocab,
+        tokenizer=tokenizer,
+        batch_size=config.general.batch_size
+    ).create_dataloader()
+
+    val_dataloader = ChordMixerDataLoader(
+        data_path=config.dataset.path,
+        dataset_name=config.dataset.val,
+        vocab=vocab,
+        tokenizer=tokenizer,
+        batch_size=config.general.batch_size
+    ).create_dataloader()
+
+    test_dataloader = ChordMixerDataLoader(
+        data_path=config.dataset.path,
+        dataset_name=config.dataset.test,
+        vocab=vocab,
+        tokenizer=tokenizer,
+        batch_size=config.general.batch_size
+    ).create_dataloader()
 
     trainer = ChordMixerTrainer(
         model=model,
@@ -47,12 +67,13 @@ def main(config):
         device=device,
         criterion=criterion,
         optimizer=optimizer,
+        log_every_n_steps=config.general.log_every_n_steps
     )
 
     for epoch in range(config.general.max_epochs):
         trainer.train(current_epoch_nr=epoch)
         trainer.evaluate(current_epoch_nr=epoch)
-        
+
     trainer.test()
 
 

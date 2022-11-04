@@ -20,11 +20,11 @@ def complete_batch(dataframe, batch_size):
         if remainder != 0:
             bucket = pd.concat([bucket, pd.concat([bucket.iloc[:1]] * (batch_size - remainder))], ignore_index=True)
             integer += 1
-            
+
         batch_ids = []
         for i in range(integer):
             batch_ids.extend([f'{i}_bucket{gr_id}'] * batch_size)
-            
+
         bucket['batch_id'] = batch_ids
         complete_buckets.append(bucket)
     return pd.concat(complete_buckets, ignore_index=True)
@@ -45,26 +45,23 @@ def concater_collate(batch):
 
 def process_dataframe(dataframe, vocab, tokenizer):
     dataframe["text"] = dataframe["text"].apply(lambda x: np.array(vocab(tokenizer(x))))
-    dataframe['seq_len'] =  dataframe['text'].apply(lambda x: len(x))
-    
+    dataframe['seq_len'] = dataframe['text'].apply(lambda x: len(x))
+
     percentiles = [i * 0.1 for i in range(10)] + [.95, .99, .995]
     buckets = np.quantile(dataframe['seq_len'], percentiles)
     bucket_labels = [i for i in range(len(buckets) - 1)]
     dataframe['bucket'] = pd.cut(dataframe['seq_len'], bins=buckets, labels=bucket_labels)
-    
+
     dataframe["seq_len"] = dataframe["seq_len"].astype(int)
-    
+
     return dataframe[['text', 'label', "seq_len", "bucket"]]
 
 
 class DatasetCreator(Dataset):
-    def __init__(self, dataframe, batch_size, var_len=False):
-        if var_len:
-            dataframe = complete_batch(dataframe=dataframe, batch_size=batch_size)
-            dataframe = shuffle_batches(dataframe=dataframe)
-            self.dataframe = dataframe[['text', 'label', 'seq_len', 'bucket']]
-        else:
-            self.dataframe = dataframe
+    def __init__(self, dataframe, batch_size):
+        dataframe = complete_batch(dataframe=dataframe, batch_size=batch_size)
+        dataframe = shuffle_batches(dataframe=dataframe)
+        self.dataframe = dataframe[['text', 'label', 'seq_len', 'bucket']]
 
     def __getitem__(self, index):
         X, Y, seq_len, bucket = self.dataframe.iloc[index, :]
@@ -91,10 +88,9 @@ class ChordMixerDataLoader:
 
         dataset = DatasetCreator(
             dataframe=dataframe,
-            batch_size=self.batch_size,
-            var_len=True
+            batch_size=self.batch_size
         )
-        
+
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
