@@ -1,0 +1,33 @@
+dataset:
+  path:  ${hydra:runtime.cwd}/../data
+  train: train.csv
+  val: val.csv
+  test: test.csv
+
+model:
+  vocab_size: 160_000
+  max_seq_len: 10_000
+  variable_length: true
+  track_size: 16
+  hidden_size: 196
+  mlp_dropout: 0
+  layer_dropout: 0
+  n_class: 2
+
+optimizer:
+  learning_rate: 0.0001
+
+wandb:
+  project: "FNDER"
+  entity: "ravaghi"
+
+general:
+  seed: 42
+  device_id: 0
+  compute_class_weights: true
+  max_epochs: 10
+  batch_size: 50
+
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/../outputs
