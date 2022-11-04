@@ -5,6 +5,8 @@ import random
 import torch
 import os
 
+from preprocessing import clean_text
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
@@ -51,7 +53,6 @@ def process_dataframe(dataframe, vocab, tokenizer):
     buckets = np.quantile(dataframe['seq_len'], percentiles)
     bucket_labels = [i for i in range(len(buckets) - 1)]
     dataframe['bucket'] = pd.cut(dataframe['seq_len'], bins=buckets, labels=bucket_labels)
-
     dataframe["seq_len"] = dataframe["seq_len"].astype(int)
 
     return dataframe[['text', 'label', "seq_len", "bucket"]]
@@ -84,6 +85,7 @@ class ChordMixerDataLoader:
     def create_dataloader(self):
         data_path = os.path.join(self.data_path, self.dataset_name)
         dataframe = pd.read_csv(data_path)
+        dataframe = clean_text(dataframe)
         dataframe = process_dataframe(dataframe, self.vocab, self.tokenizer)
 
         dataset = DatasetCreator(

@@ -1,7 +1,12 @@
+import string
+
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
+from nltk.corpus import stopwords
 import pandas as pd
 import os
+
+nltk.download('stopwords')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -19,3 +24,13 @@ def build_vocabulary(training_data_path, training_data_name):
     vocab.set_default_index(vocab["<unk>"])
 
     return vocab, tokenizer
+
+
+def clean_text(dataframe):
+    dataframe["text"] = dataframe["text"].apply(lambda x: x.lower())
+    dataframe["text"] = dataframe["text"].apply(
+        lambda x: " ".join([word for word in x.split() if word not in stopwords.words('english')]))
+    dataframe["text"] = dataframe["text"].apply(
+        lambda x: " ".join([word for word in x.split() if not word.startswith("http")]))
+    dataframe["text"] = dataframe["text"].str.replace(string.punctuation, '')
+    return dataframe
