@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import os
 
-from preprocessing import clean_text, tokenize_text, pad_tokens
+from preprocessing.preprocessing import clean_text, tokenize_text, pad_tokens
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

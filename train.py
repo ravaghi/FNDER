@@ -5,8 +5,8 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from hydra.utils import instantiate
 
-from utils import init_run, get_class_weights
-from preprocessing import build_vocabulary
+from utils.utils import init_run, get_class_weights
+from preprocessing.preprocessing import build_vocabulary
 
 
 @hydra.main(config_path="configs", version_base=None)

@@ -4,7 +4,7 @@ import random
 import torch
 import os
 
-from preprocessing import clean_text, tokenize_text
+from preprocessing.preprocessing import clean_text, tokenize_text
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
