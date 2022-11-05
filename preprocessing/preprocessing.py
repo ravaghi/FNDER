@@ -9,7 +9,7 @@ import re
 
 nltk.download('stopwords')
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
 def build_vocabulary(training_data_path, training_data_name):
@@ -29,11 +29,11 @@ def build_vocabulary(training_data_path, training_data_name):
 
 def clean_text(dataframe):
     dataframe["text"] = dataframe["subject"] + " " + dataframe["title"] + " " + dataframe["text"]
-    
+
     del dataframe['title']
     del dataframe['subject']
     del dataframe['date']
-    
+
     stop_words = list(set(stopwords.words('english')))
 
     def _process_text(text):
@@ -55,13 +55,14 @@ def tokenize_text(dataframe, vocab, tokenizer):
     bucket_labels = [i for i in range(len(buckets) - 1)]
     dataframe['bucket'] = pd.cut(dataframe['seq_len'], bins=buckets, labels=bucket_labels)
     dataframe["seq_len"] = dataframe["seq_len"].astype(int)
-    
+
     dataframe = dataframe[dataframe['seq_len'] > 10]
 
     return dataframe[['text', 'label', "seq_len", "bucket"]]
 
 
 def pad_tokens(dataframe, vocab, max_len):
-    dataframe['text'] = dataframe['text'].apply(lambda x: np.pad(x, (0, max(0, max_len - len(x))), 'constant', constant_values=vocab["<unk>"]))
+    dataframe['text'] = dataframe['text'].apply(
+        lambda x: np.pad(x, (0, max(0, max_len - len(x))), 'constant', constant_values=vocab["<unk>"]))
     dataframe["text"] = dataframe["text"].apply(lambda x: x[:max_len])
     return dataframe

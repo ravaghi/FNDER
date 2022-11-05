@@ -24,10 +24,6 @@ class MLP(nn.Module):
 
 
 class RotateChord(nn.Module):
-    """
-    Parameter-free module to perform tracks shift.
-    """
-
     def __init__(self, n_tracks, track_size):
         super(RotateChord, self).__init__()
         self.n_tracks = n_tracks

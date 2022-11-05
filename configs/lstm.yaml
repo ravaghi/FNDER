@@ -9,6 +9,7 @@ dataloader:
   data_path: ${dataset.path}
   batch_size: ${general.batch_size}
   clean_text: true
+  seq_len: ${model.seq_len}
 
 model:
   _target_: models.lstm.LSTM
@@ -16,9 +17,10 @@ model:
   embedding_dim: 300
   hidden_dim: 128
   n_layers: 2
+  seq_len: 1000
 
 trainer:
-  _target_: trainers.lstm.LSTMTrainer
+  _target_: trainers.trainer.Trainer
 
 optimizer:
   learning_rate: 0.0001

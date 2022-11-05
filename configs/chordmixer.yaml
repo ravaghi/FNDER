@@ -21,7 +21,7 @@ model:
   n_class: 2
 
 trainer:
-  _target_: trainers.chordmixer.ChordMixerTrainer
+  _target_: trainers.trainer.Trainer
 
 optimizer:
   learning_rate: 0.0005
