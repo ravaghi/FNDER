@@ -24,6 +24,7 @@ def init_run(config):
     wandb.init(project=config.wandb.project,
                entity=config.wandb.entity,
                config=OmegaConf.to_container(config, resolve=True),
+               name=config.wandb.name,
                dir=BASE_DIR)
 
     print("-" * 30 + " config " + "-" * 30)

@@ -138,6 +138,6 @@ class ChordMixerTrainer:
         test_auc = metrics.roc_auc_score(targets, preds)
         test_accuracy = correct / total
         test_loss = running_loss / num_batches
-        wandb.log({'test_loss': test_loss})
-        wandb.log({'test_accuracy': test_accuracy})
-        wandb.log({'test_auc': test_auc})
+        wandb.run.summary["test_loss"] = test_loss
+        wandb.run.summary["test_accuracy"] = test_accuracy
+        wandb.run.summary["test_auc"] = test_auc

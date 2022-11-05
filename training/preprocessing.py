@@ -1,9 +1,9 @@
-import string
-
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import build_vocab_from_iterator
 from nltk.corpus import stopwords
 import pandas as pd
+import numpy as np
+import nltk
 import os
 
 nltk.download('stopwords')
@@ -27,10 +27,22 @@ def build_vocabulary(training_data_path, training_data_name):
 
 
 def clean_text(dataframe):
-    dataframe["text"] = dataframe["text"].apply(lambda x: x.lower())
-    dataframe["text"] = dataframe["text"].apply(
-        lambda x: " ".join([word for word in x.split() if word not in stopwords.words('english')]))
-    dataframe["text"] = dataframe["text"].apply(
-        lambda x: " ".join([word for word in x.split() if not word.startswith("http")]))
-    dataframe["text"] = dataframe["text"].str.replace(string.punctuation, '')
+    stop_words = list(set(stopwords.words('english')))
+    dataframe['text'] = dataframe['text'].apply(lambda x: x.lower())
+    dataframe['text'] = dataframe['text'].apply(lambda x: x.replace(r'[^\w\s]', ''))
+    dataframe['text'] = dataframe['text'].apply(
+        lambda x: ' '.join([word for word in x.split() if word not in stop_words]))
+
     return dataframe
+
+
+def tokenize_text(dataframe, vocab, tokenizer):
+    dataframe["text"] = dataframe["text"].apply(lambda x: np.array(vocab(tokenizer(x))))
+    dataframe['seq_len'] = dataframe['text'].apply(lambda x: len(x))
+    percentiles = [i * 0.1 for i in range(10)] + [.95, .99, .995]
+    buckets = np.quantile(dataframe['seq_len'], percentiles)
+    bucket_labels = [i for i in range(len(buckets) - 1)]
+    dataframe['bucket'] = pd.cut(dataframe['seq_len'], bins=buckets, labels=bucket_labels)
+    dataframe["seq_len"] = dataframe["seq_len"].astype(int)
+
+    return dataframe[['text', 'label', "seq_len", "bucket"]]
