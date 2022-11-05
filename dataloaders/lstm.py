@@ -1,5 +1,6 @@
 from torch.utils.data import TensorDataset, DataLoader
 import pandas as pd
+import numpy as np
 import torch
 import os
 
@@ -9,19 +10,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 
 class LSTMDataLoader:
-    def __init__(self, data_path, dataset_name, vocab, tokenizer, batch_size, clean_text, pad_tokens):
+    def __init__(self, data_path, dataset_name, vocab, tokenizer, batch_size, clean_text):
         self.data_path = data_path
         self.dataset_name = dataset_name
         self.vocab = vocab
         self.tokenizer = tokenizer
         self.batch_size = batch_size
         self.clean_text = clean_text
-        self.pad_tokens = pad_tokens
 
     def create_dataloader(self):
         data_path = os.path.join(self.data_path, self.dataset_name)
 
-        dataframe = pd.read_csv(data_path)
+        dataframe = pd.read_csv(data_path)        
         print(f'Loaded {self.dataset_name} with {len(dataframe)} samples')
 
         if self.clean_text:
@@ -30,23 +30,19 @@ class LSTMDataLoader:
         else:
             print(f"Skipping cleaning {self.dataset_name}")
 
-        print(f'Tokenizing {self.dataset_name}\n')
+        print(f'Tokenizing {self.dataset_name}')
         dataframe = tokenize_text(dataframe, self.vocab, self.tokenizer)
 
         print(f'Padding {self.dataset_name}\n')
-        dataframe = pad_tokens(dataframe=dataframe, vocab=self.vocab, max_len=1000)
-
-        x_train = dataframe["text"]
-        y_train = dataframe["label"]
+        dataframe = pad_tokens(dataframe=dataframe, vocab=self.vocab, max_len=1000)     
 
         dataset = TensorDataset(
-            torch.from_numpy(x_train),
-            torch.tensor(y_train)
+            torch.from_numpy(np.vstack(dataframe["text"].values)),   
+            torch.from_numpy(dataframe["label"].values)                       
         )
 
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
-            shuffle=True,
             num_workers=1
         )

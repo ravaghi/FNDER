@@ -1,27 +1,19 @@
 import torch.nn as nn
+import torch
+import torch.nn.functional as F
+    
 
-
+    
 class LSTM(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, hidden_dim, n_layers, n_class, drop_prob=0.2):
-        super(LSTM, self).__init__()
-        self.n_class = n_class
-        self.n_layers = n_layers
-        self.hidden_dim = hidden_dim
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout=drop_prob, batch_first=True)
-        self.dropout = nn.Dropout(drop_prob)
-        self.fc = nn.Linear(hidden_dim, n_class)
-        self.sig = nn.Sigmoid()
-
+    def __init__(self, vocab_size, embedding_dim, hidden_dim, n_layers):
+        super(LSTM,self).__init__()
+        self.embedding = nn.Embedding(vocab_size,embedding_dim)
+        self.lstm = nn.LSTM(input_size=embedding_dim,hidden_size=hidden_dim,num_layers=n_layers,batch_first=True)
+        self.fc = nn.Linear(1000*hidden_dim,2)
+    
     def forward(self, x):
-        batch_size = x.size(0)
-        x = x.long()
-        embeds = self.embedding(x)
-        lstm_out, hidden = self.lstm(embeds)
-        lstm_out = lstm_out.contiguous().view(-1, self.hidden_dim)
-        out = self.dropout(lstm_out)
-        out = self.fc(out)
-        sig_out = self.sig(out)
-        sig_out = sig_out.view(batch_size, -1, 3)
-        sig_out = sig_out[:, -1, :]
-        return sig_out
+        x = self.embedding(x)
+        x, _ = self.lstm(x)
+        x = torch.reshape(x, (x.size(0),-1,))
+        x = self.fc(x)
+        return F.log_softmax(x,dim=-1)
