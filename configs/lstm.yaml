@@ -23,7 +23,7 @@ trainer:
   _target_: trainers.trainer.Trainer
 
 optimizer:
-  learning_rate: 0.0005
+  learning_rate: 0.00001
 
 wandb:
   project: FNDER
