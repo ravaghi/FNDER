@@ -23,19 +23,19 @@ trainer:
   _target_: trainers.trainer.Trainer
 
 optimizer:
-  learning_rate: 0.0001
+  learning_rate: 0.0005
 
 wandb:
   project: FNDER
   entity: ravaghi
-  name: lstm
+  name: LSTM
 
 general:
   seed: 42
   device_id: 0
   compute_class_weights: true
   max_epochs: 10
-  batch_size: 50
+  batch_size: 100
 
 hydra:
   run:
