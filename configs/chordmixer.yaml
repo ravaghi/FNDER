@@ -1,10 +1,17 @@
 dataset:
-  path: ${hydra:runtime.cwd}/../data
+  path: ${hydra:runtime.cwd}/data
   train: train.csv
   val: val.csv
   test: test.csv
 
+dataloader:
+  _target_: dataloaders.chordmixer.ChordMixerDataLoader
+  data_path: ${dataset.path},
+  batch_size: ${general.batch_size},
+  clean_text: true
+
 model:
+  _target_: models.chordmixer.ChordMixer
   vocab_size: 160_000
   max_seq_len: 10_000
   track_size: 16
@@ -13,11 +20,11 @@ model:
   layer_dropout: 0
   n_class: 2
 
-dataloader:
-  clean_text: true
-
+trainer:
+  _target_: trainers.chordmixer.ChordMixerTrainer
+  
 optimizer:
-  learning_rate: 0.0001
+  learning_rate: 0.00005
 
 wandb:
   project: "FNDER"

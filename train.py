@@ -3,28 +3,18 @@ import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from hydra.utils import instantiate
 
 
 from utils import init_run, get_class_weights
-from model import ChordMixer
-from dataloader import ChordMixerDataLoader
-from trainer import ChordMixerTrainer
 from preprocessing import build_vocabulary
 
 
-@hydra.main(config_path="configs", config_name="config", version_base=None)
+@hydra.main(config_path="configs", version_base=None)
 def main(config):
     device = init_run(config)
 
-    model = ChordMixer(
-        vocab_size=config.model.vocab_size,
-        max_seq_len=config.model.max_seq_len,
-        track_size=config.model.track_size,
-        hidden_size=config.model.hidden_size,
-        mlp_dropout=config.model.mlp_dropout,
-        layer_dropout=config.model.layer_dropout,
-        n_class=config.model.n_class
-    ).to(device)
+    model = instantiate(config=config.model).to(device)
 
     if config.general.compute_class_weights:
         class_weights = get_class_weights(config.dataset.path, config.dataset.train)
@@ -38,34 +28,29 @@ def main(config):
 
     vocab, tokenizer = build_vocabulary(config.dataset.path, config.dataset.train)
 
-    train_dataloader = ChordMixerDataLoader(
-        data_path=config.dataset.path,
+    train_dataloader = instantiate(
+        config=config.dataloader,
         dataset_name=config.dataset.train,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size,
-        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
-    val_dataloader = ChordMixerDataLoader(
-        data_path=config.dataset.path,
-        dataset_name=config.dataset.val,
+    val_dataloader = instantiate(
+        config=config.dataloader,
+        dataset_name=config.dataset.train,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size,
-        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
-    test_dataloader = ChordMixerDataLoader(
-        data_path=config.dataset.path,
-        dataset_name=config.dataset.test,
+    test_dataloader = instantiate(
+        config=config.dataloader,
+        dataset_name=config.dataset.train,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size,
-        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
-    trainer = ChordMixerTrainer(
+    trainer = instantiate(
+        config=config.trainer,
         model=model,
         train_dataloader=train_dataloader,
         val_dataloader=val_dataloader,
