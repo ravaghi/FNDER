@@ -81,7 +81,7 @@ class ChordMixerDataLoader:
         else:
             print(f"Skipping cleaning {self.dataset_name} dataset")
         
-        print(f'Tokenizing {self.dataset_name} dataset')
+        print(f'Tokenizing {self.dataset_name} dataset\n')
         dataframe = tokenize_text(dataframe, self.vocab, self.tokenizer)
 
         dataset = DatasetCreator(

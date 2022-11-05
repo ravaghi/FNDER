@@ -6,8 +6,8 @@ dataset:
 
 dataloader:
   _target_: dataloaders.chordmixer.ChordMixerDataLoader
-  data_path: ${dataset.path},
-  batch_size: ${general.batch_size},
+  data_path: ${dataset.path}
+  batch_size: ${general.batch_size}
   clean_text: true
 
 model:
@@ -40,4 +40,4 @@ general:
 
 hydra:
   run:
-    dir: ${hydra:runtime.cwd}/../outputs
+    dir: ${hydra:runtime.cwd}/outputs

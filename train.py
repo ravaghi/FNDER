@@ -32,21 +32,21 @@ def main(config):
         config=config.dataloader,
         dataset_name=config.dataset.train,
         vocab=vocab,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer
     ).create_dataloader()
 
     val_dataloader = instantiate(
         config=config.dataloader,
-        dataset_name=config.dataset.train,
+        dataset_name=config.dataset.val,
         vocab=vocab,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer
     ).create_dataloader()
 
     test_dataloader = instantiate(
         config=config.dataloader,
-        dataset_name=config.dataset.train,
+        dataset_name=config.dataset.test,
         vocab=vocab,
-        tokenizer=tokenizer,
+        tokenizer=tokenizer
     ).create_dataloader()
 
     trainer = instantiate(
