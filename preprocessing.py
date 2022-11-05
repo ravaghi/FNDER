@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import nltk
 import os
+import re
 
 nltk.download('stopwords')
 
@@ -28,10 +29,16 @@ def build_vocabulary(training_data_path, training_data_name):
 
 def clean_text(dataframe):
     stop_words = list(set(stopwords.words('english')))
-    dataframe['text'] = dataframe['text'].apply(lambda x: x.lower())
-    dataframe['text'] = dataframe['text'].apply(lambda x: x.replace(r'[^\w\s]', ''))
-    dataframe['text'] = dataframe['text'].apply(
-        lambda x: ' '.join([word for word in x.split() if word not in stop_words]))
+
+    def _process_text(text):
+        text = text.lower()
+        text = " ".join([word for word in text.split(" ") if word not in stop_words])
+        text = re.sub(r"[^\w\s]", '', text)
+        text = re.sub(r"\s+", '', text)
+        text = re.sub(r"\d", '', text)
+        return text
+
+    dataframe['text'] = dataframe['text'].apply(_process_text)
 
     return dataframe
 
@@ -46,3 +53,9 @@ def tokenize_text(dataframe, vocab, tokenizer):
     dataframe["seq_len"] = dataframe["seq_len"].astype(int)
 
     return dataframe[['text', 'label', "seq_len", "bucket"]]
+
+
+def pad_tokens(dataframe, vocab, max_len):
+    dataframe['text'] = dataframe['text'].apply(
+        lambda x: np.pad(x, (0, max_len - len(x)), 'constant', constant_values=vocab["<unk>"]))
+    return dataframe
