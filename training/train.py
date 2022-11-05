@@ -43,7 +43,8 @@ def main(config):
         dataset_name=config.dataset.train,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size
+        batch_size=config.general.batch_size,
+        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
     val_dataloader = ChordMixerDataLoader(
@@ -51,7 +52,8 @@ def main(config):
         dataset_name=config.dataset.val,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size
+        batch_size=config.general.batch_size,
+        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
     test_dataloader = ChordMixerDataLoader(
@@ -59,7 +61,8 @@ def main(config):
         dataset_name=config.dataset.test,
         vocab=vocab,
         tokenizer=tokenizer,
-        batch_size=config.general.batch_size
+        batch_size=config.general.batch_size,
+        clean_text=config.dataloader.clean_text
     ).create_dataloader()
 
     trainer = ChordMixerTrainer(

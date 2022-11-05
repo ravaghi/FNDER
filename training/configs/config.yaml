@@ -13,6 +13,9 @@ model:
   layer_dropout: 0
   n_class: 2
 
+dataloader:
+  clean_text: true
+
 optimizer:
   learning_rate: 0.0001
 

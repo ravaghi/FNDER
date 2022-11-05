@@ -61,12 +61,13 @@ class DatasetCreator(Dataset):
 
 
 class ChordMixerDataLoader:
-    def __init__(self, data_path, dataset_name, vocab, tokenizer, batch_size):
+    def __init__(self, data_path, dataset_name, vocab, tokenizer, batch_size, clean_text):
         self.data_path = data_path
         self.dataset_name = dataset_name
         self.vocab = vocab
         self.tokenizer = tokenizer
         self.batch_size = batch_size
+        self.clean_text = clean_text
 
     def create_dataloader(self):
         data_path = os.path.join(self.data_path, self.dataset_name)
@@ -74,8 +75,11 @@ class ChordMixerDataLoader:
         dataframe = pd.read_csv(data_path)
         print(f'Loaded {self.dataset_name} dataset with {len(dataframe)} samples')
         
-        print(f'Cleaning {self.dataset_name} dataset')
-        dataframe = clean_text(dataframe)
+        if self.clean_text:
+            print(f'Cleaning {self.dataset_name} dataset')
+            dataframe = clean_text(dataframe)
+        else:
+            print(f"Skipping cleaning {self.dataset_name} dataset")
         
         print(f'Tokenizing {self.dataset_name} dataset')
         dataframe = tokenize_text(dataframe, self.vocab, self.tokenizer)
