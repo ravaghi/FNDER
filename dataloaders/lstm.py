@@ -39,7 +39,9 @@ class LSTMDataLoader:
 
         dataset = TensorDataset(
             torch.from_numpy(np.vstack(dataframe["text"].values)),
-            torch.from_numpy(dataframe["label"].values)
+            torch.from_numpy(dataframe["label"].values),
+            torch.from_numpy(dataframe["seq_len"].values),
+            torch.from_numpy(dataframe["bucket"].values)
         )
 
         return DataLoader(

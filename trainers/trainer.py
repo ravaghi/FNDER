@@ -3,8 +3,10 @@ from sklearn import metrics
 import torch
 import wandb
 
+from models.chordmixer import ChordMixer
 
-class LSTMTrainer:
+
+class Trainer:
     def __init__(self, model, train_dataloader, val_dataloader, test_dataloader, device, criterion, optimizer):
         self.model = model
         self.train_dataloader = train_dataloader
@@ -26,11 +28,14 @@ class LSTMTrainer:
         items_processed = 0
 
         loop = tqdm(enumerate(self.train_dataloader), total=num_batches)
-        for idx, (x, y) in loop:
+        for idx, (x, y, seq_len, bucket) in loop:
             x = x.to(self.device)
             y = y.to(self.device)
 
-            y_hat = self.model(x)
+            if isinstance(self.model, ChordMixer):
+                y_hat = self.model(x, seq_len)
+            else:
+                y_hat = self.model(x)
 
             loss = self.criterion(y_hat, y)
             loss.backward()
@@ -71,11 +76,14 @@ class LSTMTrainer:
 
         with torch.no_grad():
             loop = tqdm(enumerate(self.val_dataloader), total=num_batches)
-            for idx, (x, y) in loop:
+            for idx, (x, y, seq_len, bucket) in loop:
                 x = x.to(self.device)
                 y = y.to(self.device)
 
-                y_hat = self.model(x)
+                if isinstance(self.model, ChordMixer):
+                    y_hat = self.model(x, seq_len)
+                else:
+                    y_hat = self.model(x)
 
                 loss = self.criterion(y_hat, y)
 
@@ -114,11 +122,14 @@ class LSTMTrainer:
 
         with torch.no_grad():
             loop = tqdm(enumerate(self.test_dataloader), total=num_batches)
-            for idx, (x, y) in loop:
+            for idx, (x, y, seq_len, bucket) in loop:
                 x = x.to(self.device)
                 y = y.to(self.device)
 
-                y_hat = self.model(x)
+                if isinstance(self.model, ChordMixer):
+                    y_hat = self.model(x, seq_len)
+                else:
+                    y_hat = self.model(x)
 
                 loss = self.criterion(y_hat, y)
 

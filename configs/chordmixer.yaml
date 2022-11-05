@@ -29,7 +29,7 @@ optimizer:
 wandb:
   project: FNDER
   entity: ravaghi
-  name: chordmixer
+  name: ChordMixer
 
 general:
   seed: 42
