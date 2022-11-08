@@ -24,7 +24,7 @@ trainer:
   _target_: trainers.trainer.Trainer
 
 optimizer:
-  learning_rate: 0.00001
+  learning_rate: 0.0007
 
 wandb:
   project: FNDER
@@ -36,7 +36,7 @@ general:
   device_id: 0
   compute_class_weights: true
   max_epochs: 10
-  batch_size: 50
+  batch_size: 30
 
 hydra:
   run:
