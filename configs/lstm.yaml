@@ -17,13 +17,13 @@ model:
   embedding_dim: 300
   hidden_dim: 128
   n_layers: 2
-  seq_len: 1000
+  seq_len: 2000
 
 trainer:
   _target_: trainers.trainer.Trainer
 
 optimizer:
-  learning_rate: 0.00001
+  learning_rate: 0.0025
 
 wandb:
   project: FNDER
@@ -35,7 +35,7 @@ general:
   device_id: 0
   compute_class_weights: true
   max_epochs: 10
-  batch_size: 100
+  batch_size: 40
 
 hydra:
   run:
