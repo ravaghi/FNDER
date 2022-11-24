@@ -1,6 +1,6 @@
 # Fake News Detection
 
-This is a comparison between LSTM and [ChordMixer](https://github.com/RuslanKhalitov/ChordMixer) on classifying fake news articles. The dataset used is from [Kaggle](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset). 
+This is a comparison between LSTM and [ChordMixer](https://github.com/RuslanKhalitov/ChordMixer) on classifying fake news articles using the _Fake vs. Real News_ dataset  from [Kaggle](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset). 
 
 ## Results (test)
 
